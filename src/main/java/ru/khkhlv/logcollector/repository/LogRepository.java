@@ -1,17 +1,13 @@
 package ru.khkhlv.logcollector.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 import ru.khkhlv.logcollector.model.LogEntry;
 
 import java.time.Instant;
 import java.util.List;
 
-@Repository
 public interface LogRepository extends JpaRepository<LogEntry, Long>,
         JpaSpecificationExecutor<LogEntry>,
         LogRepositoryCustom {
@@ -48,6 +44,4 @@ public interface LogRepository extends JpaRepository<LogEntry, Long>,
             "GROUP BY l.source " +
             "HAVING MAX(l.createdAt) < :threshold")
     List<String> findDeadSources(Instant threshold);
-
-    Page<LogEntry> findBySourceAndLevel(String source, String level, Pageable pageable);
 }

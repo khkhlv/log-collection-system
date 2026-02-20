@@ -1,16 +1,13 @@
 package ru.khkhlv.logcollector.controller;
 import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.khkhlv.logcollector.model.LogEntry;
-import ru.khkhlv.logcollector.service.LogCreateRequest;
-import ru.khkhlv.logcollector.service.LogSearchService;
 import ru.khkhlv.logcollector.service.LogService;
-import ru.khkhlv.logcollector.model.LogEntry;
+import ru.khkhlv.logcollector.service.search.LogSearchService;
 
 import java.time.Instant;
 import java.util.List;
@@ -18,13 +15,17 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/logs")
-@RequiredArgsConstructor
 @Slf4j
 @Timed("log.controller")
 public class LogController {
 
     private final LogService logService;
     private final LogSearchService searchService;
+
+    public LogController(LogService logService, LogSearchService searchService) {
+        this.logService = logService;
+        this.searchService = searchService;
+    }
 
     /**
      * Добавление одного или нескольких логов

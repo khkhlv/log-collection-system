@@ -1,16 +1,21 @@
-package ru.khkhlv.logcollector.service;
+package ru.khkhlv.logcollector.service.metrics;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
+@Slf4j
 public class LogMetricsCollector {
 
     private final MeterRegistry meterRegistry;
+
+    public LogMetricsCollector(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
 
     /**
      * Записывает метрики приёма логов через HTTP/файлы/Kafka.

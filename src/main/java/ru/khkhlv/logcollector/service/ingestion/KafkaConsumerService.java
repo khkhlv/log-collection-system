@@ -9,11 +9,14 @@ import ru.khkhlv.logcollector.model.LogEntry;
 import ru.khkhlv.logcollector.service.LogService;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class KafkaConsumerService {
 
     private final LogService logService;
+
+    public KafkaConsumerService(LogService logService) {
+        this.logService = logService;
+    }
 
     @KafkaListener(topics = "${app.ingestion.kafka.topics}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeLog(ConsumerRecord<String, String> record) {

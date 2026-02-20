@@ -1,0 +1,51 @@
+{
+    "title": "Log Collection System",
+    "panels": [
+      {
+        "title": "Total Logs Over Time",
+        "type": "timeseries",
+        "targets": [{
+          "expr": "sum(increase(logs_ingested_total[5m]))",
+          "legendFormat": "Logs/sec"
+        }]
+      },
+      {
+        "title": "Logs by Level",
+        "type": "piechart",
+        "targets": [{
+          "expr": "sum by(level) (logs_ingested_total)",
+          "legendFormat": "{{level}}"
+        }]
+      },
+      {
+        "title": "Top Sources",
+        "type": "barchart",
+        "targets": [{
+          "expr": "topk(10, sum by(source) (logs_ingested_total))"
+        }]
+      },
+      {
+        "title": "Error Rate",
+        "type": "stat",
+        "targets": [{
+          "expr": "sum(logs_ingested_total{level=~\"ERROR|CRITICAL\"}) / sum(logs_ingested_total) * 100"
+        }],
+        "fieldConfig": {
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 5},
+              {"color": "red", "value": 15}
+            ]
+          }
+        }
+      },
+      {
+        "title": "Dead Services Detection",
+        "type": "table",
+        "targets": [{
+          "expr": "absent_over_time(logs_ingested_total[1h])"
+        }]
+      }
+    ]
+}

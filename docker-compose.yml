@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: logdb
+      POSTGRES_USER: loguser
+      POSTGRES_PASSWORD: logpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U loguser -d logdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka
+    ports:
+      - "9092:9092"   # Для клиентов внутри контейнеров
+      - "9093:9093"   # Для клиентов с хоста (локально)
+    command: >
+      sh -c "
+        /etc/confluent/docker/run &
+        echo 'Waiting for Kafka to be ready...' &&
+        sleep 15 &&
+        echo 'Creating topics...' &&
+        kafka-topics --bootstrap-server localhost:9092 --create --if-not-exists --topic logs_raw --partitions 3 --replication-factor 1 &&
+        kafka-topics --bootstrap-server localhost:9092 --create --if-not-exists --topic logs_application --partitions 3 --replication-factor 1 &&
+        echo 'Topics created successfully:' &&
+        kafka-topics --bootstrap-server localhost:9092 --list &&
+        wait
+      "
+    environment:
+      CLUSTER_ID: "4L6g3mJrT2qD7X9vZ1yN8w"
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: "broker,controller"
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+
+      # Слушатели:
+      # - PLAINTEXT:9092 — для внутренних клиентов
+      # - PLAINTEXT_HOST:9093 — для клиентов с хоста
+      # - CONTROLLER:9094 — для внутренней коммуникации контроллера
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9094,PLAINTEXT_HOST://0.0.0.0:9093"
+
+      # Рекламируемые адреса (то, что брокер сообщает клиентам):
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://127.0.0.1:9093"
+      # Имя слушателя для межброкерной коммуникации
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+
+      # Контроллер
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9094"
+
+      # Прочие настройки
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx256M -Xms128M"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:10.2.0
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  superset:
+    image: apache/superset:latest
+    environment:
+      - SUPERSET_SECRET_KEY=dev-secret-key-change-in-prod
+      - SUPERSET_LOAD_EXAMPLES=no
+    ports:
+      - "8088:8088"
+    volumes:
+      - superset_data:/app/superset_home
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+  superset_data:

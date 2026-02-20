@@ -2,24 +2,27 @@ package ru.khkhlv.logcollector.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.khkhlv.logcollector.controller.LogCreateRequest;
 import ru.khkhlv.logcollector.model.LogEntry;
 import ru.khkhlv.logcollector.repository.LogRepository;
+import ru.khkhlv.logcollector.service.metrics.LogMetricsCollector;
 import ru.khkhlv.logcollector.service.parser.LogParser;
 import ru.khkhlv.logcollector.service.parser.LogParserFactory;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class LogService {
 
     private final LogRepository logRepository;
@@ -90,8 +93,13 @@ public class LogService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public Optional<LogEntry> findById(Long id) {
-        return logRepository.findById(id);
-    }
+//
+//    public Page<LogEntry> search(String message, String level, String source,
+//                                 String host, String environment, Instant from, Instant to,
+//                                 Map<String, String> payload, int page, int size) {
+//
+//        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+//        return logRepository.searchLogs(message, level, source, host, environment,
+//                from, to, (Map<String, Object>) (Map<?, ?>) payload, pageable);
+//    }
 }
