@@ -1,0 +1,355 @@
+{
+  "title": "Log Collection System - Performance & Health",
+  "uid": "log-system-performance",
+  "version": 1,
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "System Overview",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0}
+    },
+    {
+      "title": "Application Status",
+      "type": "stat",
+      "gridPos": {"h": 3, "w": 2, "x": 0, "y": 1},
+      "targets": [{
+        "expr": "up{job='log-collector'}",
+        "legendFormat": "Status"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [
+            {"type": "value", "value": "1", "text": "UP", "color": "green"},
+            {"type": "value", "value": "0", "text": "DOWN", "color": "red"}
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Active Sessions",
+      "type": "stat",
+      "gridPos": {"h": 3, "w": 2, "x": 2, "y": 1},
+      "targets": [{
+        "expr": "tomcat_sessions_active_current_sessions",
+        "legendFormat": "Active"
+      }]
+    },
+    {
+      "title": "Uptime",
+      "type": "stat",
+      "gridPos": {"h": 3, "w": 2, "x": 4, "y": 1},
+      "targets": [{
+        "expr": "process_uptime_seconds",
+        "legendFormat": "Uptime"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 0
+        }
+      }
+    },
+    {
+      "title": "Start Time",
+      "type": "stat",
+      "gridPos": {"h": 3, "w": 3, "x": 6, "y": 1},
+      "targets": [{
+        "expr": "process_start_time_seconds",
+        "legendFormat": "Start"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "time_epoch",
+          "decimals": 0
+        }
+      }
+    },
+
+    {
+      "title": "Application Performance",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 4}
+    },
+    {
+      "title": "RPS by Endpoint",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 5},
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count[1m])) by (uri)",
+          "legendFormat": "{{uri}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rps",
+          "custom": {"lineInterpolation": "smooth"}
+        }
+      }
+    },
+    {
+      "title": "Log Processing Performance",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 21}
+    },
+    {
+      "title": "Logs Ingestion Rate",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 22},
+      "targets": [
+        {
+          "expr": "sum(rate(logs_ingested_total[1m]))",
+          "legendFormat": "Logs/sec"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps"
+        }
+      }
+    },
+    {
+      "title": "Batch Size",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 22},
+      "targets": [
+        {
+          "expr": "rate(logs_ingestion_batch_size_sum[5m]) / rate(logs_ingestion_batch_size_count[5m])",
+          "legendFormat": "Avg batch size",
+          "refId": "A"
+        },
+        {
+          "expr": "max_over_time(logs_ingestion_batch_size_max[5m])",
+          "legendFormat": "Max batch size",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "title": "Resource Usage",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 30}
+    },
+    {
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 31},
+      "targets": [
+        {
+          "expr": "process_cpu_usage",
+          "legendFormat": "Process CPU"
+        },
+        {
+          "expr": "system_cpu_usage",
+          "legendFormat": "System CPU"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      }
+    },
+    {
+      "title": "Memory Usage",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 31},
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{area='heap'}",
+          "legendFormat": "Heap used"
+        },
+        {
+          "expr": "jvm_memory_used_bytes{area='nonheap'}",
+          "legendFormat": "Non-heap used"
+        },
+        {
+          "expr": "process_resident_memory_bytes",
+          "legendFormat": "RSS"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "title": "GC Activity",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 31},
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_pause_seconds_sum[5m])",
+          "legendFormat": "GC time (s/s)",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(jvm_gc_pause_seconds_count[5m])",
+          "legendFormat": "GC count/s",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "title": "Disk Space",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 39},
+      "targets": [
+        {
+          "expr": "disk_free_bytes",
+          "legendFormat": "Free space"
+        },
+        {
+          "expr": "disk_total_bytes - disk_free_bytes",
+          "legendFormat": "Used space"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "title": "Open Files",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 39},
+      "targets": [
+        {
+          "expr": "process_open_fds",
+          "legendFormat": "Open files"
+        },
+        {
+          "expr": "process_max_fds",
+          "legendFormat": "Max files"
+        }
+      ]
+    },
+    {
+      "title": "Threads",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 39},
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads",
+          "legendFormat": "Live threads"
+        },
+        {
+          "expr": "jvm_threads_daemon_threads",
+          "legendFormat": "Daemon threads"
+        },
+        {
+          "expr": "jvm_threads_peak_threads",
+          "legendFormat": "Peak threads"
+        }
+      ]
+    },
+
+    {
+      "title": "Kafka Consumer Health",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 47}
+    },
+    {
+      "title": "Kafka Consumer Status",
+      "type": "stat",
+      "gridPos": {"h": 3, "w": 2, "x": 0, "y": 48},
+      "targets": [{
+        "expr": "kafka_consumer_connection_count",
+        "legendFormat": "Status"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "mappings": [
+            {"type": "value", "value": "0", "text": "DISCONNECTED", "color": "red"},
+            {"type": "range", "from": 1, "to": 100, "text": "CONNECTED", "color": "green"}
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "green", "value": 1}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Consumer Lag",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 2, "y": 48},
+      "targets": [
+        {
+          "expr": "kafka_consumer_fetch_manager_records_lag",
+          "legendFormat": "Consumer lag"
+        }
+      ]
+    },
+    {
+      "title": "Kafka Message Rate",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 10, "y": 48},
+      "targets": [
+        {
+          "expr": "rate(kafka_consumer_fetch_manager_records_consumed_total[1m])",
+          "legendFormat": "Messages consumed/s"
+        }
+      ]
+    },
+    {
+      "title": "Kafka Network I/O",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 8, "x": 18, "y": 48},
+      "targets": [
+        {
+          "expr": "rate(kafka_consumer_incoming_byte_total[1m])",
+          "legendFormat": "Incoming bytes/s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps"
+        }
+      }
+    },
+
+    {
+      "title": "JVM Memory Details",
+      "type": "row",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 56}
+    },
+    {
+      "title": "JVM GC Count",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 57},
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_pause_seconds_count[5m])",
+          "legendFormat": "GC count"
+        }
+      ]
+    },
+    {
+      "title": "Classes Loaded",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 57},
+      "targets": [
+        {
+          "expr": "jvm_classes_loaded_classes",
+          "legendFormat": "Loaded classes"
+        }
+      ]
+    }
+  ]
+}

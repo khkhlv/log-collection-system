@@ -44,4 +44,7 @@ public interface LogRepository extends JpaRepository<LogEntry, Long>,
             "GROUP BY l.source " +
             "HAVING MAX(l.createdAt) < :threshold")
     List<String> findDeadSources(Instant threshold);
+
+    // Дедупликация
+    long countBySourceAndMessageAndCreatedAtAfter(String source, String message, Instant after);
 }

@@ -49,27 +49,27 @@ public class LogService {
         return Collections.emptyList();
     }
 
-    @Transactional
-    public LogEntry ingestRawLog(String rawLog, String formatType, String source) {
-        try {
-            LogParser parser = parserFactory.getParser(formatType);
-            LogEntry entry = parser.parse(rawLog);
-
-            if (entry.getSource() == null) {
-                entry.setSource(source);
-            }
-            entry.setFormatType(formatType);
-            entry.setRawContent(rawLog);
-
-            LogEntry saved = logRepository.save(entry);
-            metricsCollector.recordIngestion(1, 0);
-            return saved;
-        } catch (Exception e) {
-            log.error("Failed to parse {} log: {}", formatType, rawLog, e);
-            metricsCollector.recordParsingError(formatType);
-            throw e;
-        }
-    }
+//    @Transactional
+//    public LogEntry ingestRawLog(String rawLog, String formatType, String source) {
+//        try {
+//            LogParser parser = parserFactory.getParser(formatType);
+//            LogEntry entry = parser.parse(rawLog);
+//
+//            if (entry.getSource() == null) {
+//                entry.setSource(source);
+//            }
+//            entry.setFormatType(formatType);
+//            entry.setRawContent(rawLog);
+//
+//            LogEntry saved = logRepository.save(entry);
+//            metricsCollector.recordIngestion(1, 0);
+//            return saved;
+//        } catch (Exception e) {
+//            log.error("Failed to parse {} log: {}", formatType, rawLog, e);
+//            metricsCollector.recordParsingError(formatType);
+//            throw e;
+//        }
+//    }
 
     private LogEntry mapToEntity(LogCreateRequest request) {
         try {

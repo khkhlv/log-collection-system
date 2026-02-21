@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      # Можно переопределить через переменные окружения
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/logdb
+      SPRING_DATASOURCE_USERNAME: loguser
+      SPRING_DATASOURCE_PASSWORD: logpass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      # Для отладки
+      LOGGING_LEVEL_ORG_APACHE_KAFKA: DEBUG
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
   postgres:
     image: postgres:15-alpine
     environment:
@@ -10,7 +30,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5432:5432"  # только для внешнего доступа, внутри сети используйте postgres:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U loguser -d logdb"]
       interval: 10s
@@ -43,21 +63,20 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
 
       # Слушатели:
-      # - PLAINTEXT:9092 — для внутренних клиентов
+      # - PLAINTEXT:9092 — для внутренних клиентов (внутри Docker сети)
       # - PLAINTEXT_HOST:9093 — для клиентов с хоста
       # - CONTROLLER:9094 — для внутренней коммуникации контроллера
       KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9094,PLAINTEXT_HOST://0.0.0.0:9093"
 
-      # Рекламируемые адреса (то, что брокер сообщает клиентам):
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://127.0.0.1:9093"
-      # Имя слушателя для межброкерной коммуникации
-      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      # Рекламируемые адреса:
+      # Для внутренних сервисов используйте kafka:9092
+      # Для внешнего доступа с хоста используйте localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9093"
 
-      # Контроллер
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9094"
 
-      # Прочие настройки
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
@@ -69,6 +88,7 @@ services:
       timeout: 5s
       retries: 5
 
+  # Остальные сервисы без изменений...
   prometheus:
     image: prom/prometheus:v2.48.0
     volumes:
@@ -98,14 +118,31 @@ services:
       - prometheus
 
   superset:
-    image: apache/superset:latest
+    image: apache/superset:4.0.0
     environment:
-      - SUPERSET_SECRET_KEY=dev-secret-key-change-in-prod
       - SUPERSET_LOAD_EXAMPLES=no
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=logdb
+      - POSTGRES_USER=loguser
+      - POSTGRES_PASSWORD=logpass
+      - SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://loguser:logpass@postgres:5432/superset_meta
     ports:
       - "8088:8088"
     volumes:
       - superset_data:/app/superset_home
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py
+      - ./superset/dashboards:/app/pythonpath/dashboards
+      - ./superset/datasets:/app/pythonpath/datasets
+      - ./superset/init_superset.py:/app/pythonpath/init_superset.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "
+        python /app/pythonpath/init_superset.py &&
+        superset run -h 0.0.0.0 -p 8088 --with-threads --reload
+      "
 
 volumes:
   postgres_data:

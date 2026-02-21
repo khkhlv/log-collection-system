@@ -9,7 +9,7 @@ spring:
     generator:
       enabled: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/logdb
+    url: jdbc:postgresql://postgres:5432/logdb
     username: loguser
     password: logpass
     driver-class-name: org.postgresql.Driver
@@ -23,7 +23,7 @@ spring:
         jdbc:
           batch_size: 100
   kafka:
-    bootstrap-servers: localhost:9093
+    bootstrap-servers: kafka:9092
     consumer:
       group-id: log-collector-group
       auto-offset-reset: latest
@@ -78,12 +78,23 @@ app:
     kafka:
       topics: logs_raw
   generator:
-    http:
-      url: http://localhost:8080/api/v1/logs
-    kafka:
-      topic: logs_raw
-    file:
-      output-dir: ./logs
-    enabled: true
-    rate: 10  # логов в секунду
-    sources: auth-service,payment-service,order-service,user-service,api-gateway
+    generator:
+      # Для HTTP генератора - используем разные URL в зависимости от контекста
+      http:
+        # Внутри Docker сети используйте 'app', с хоста - 'localhost'
+        url: http://app:8080/api/v1/logs
+      kafka:
+        topic: logs_raw
+        bootstrap-servers: kafka:9092
+      file:
+        output-dir: ./logs
+      enabled: true
+      rate: 10
+      sources: auth-service,payment-service,order-service,user-service,api-gateway
+      levels: INFO,ERROR,WARN,DEBUG
+  etl:
+    validation:
+      required-fields: level,source,message,createdAt
+    deduplication:
+      enabled: true
+      window-seconds: 60  # Окно дедупликации 60 секунд

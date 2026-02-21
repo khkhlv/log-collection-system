@@ -1,0 +1,370 @@
+{
+    "version": "1.0.0",
+    "dashboards": [
+        {
+            "dashboard_title": "Log Collection System",
+            "description": "Analytics dashboard for log collection system monitoring",
+            "position": {
+                "CHART-1": {
+                    "children": [],
+                    "id": "CHART-1",
+                    "meta": {
+                        "chartId": 1,
+                        "width": 12,
+                        "height": 50,
+                        "row": 0,
+                        "column": 0
+                    },
+                    "type": "CHART"
+                },
+                "CHART-2": {
+                    "children": [],
+                    "id": "CHART-2",
+                    "meta": {
+                        "chartId": 2,
+                        "width": 6,
+                        "height": 50,
+                        "row": 1,
+                        "column": 0
+                    },
+                    "type": "CHART"
+                },
+                "CHART-3": {
+                    "children": [],
+                    "id": "CHART-3",
+                    "meta": {
+                        "chartId": 3,
+                        "width": 6,
+                        "height": 50,
+                        "row": 1,
+                        "column": 1
+                    },
+                    "type": "CHART"
+                },
+                "CHART-4": {
+                    "children": [],
+                    "id": "CHART-4",
+                    "meta": {
+                        "chartId": 4,
+                        "width": 4,
+                        "height": 50,
+                        "row": 2,
+                        "column": 0
+                    },
+                    "type": "CHART"
+                },
+                "CHART-5": {
+                    "children": [],
+                    "id": "CHART-5",
+                    "meta": {
+                        "chartId": 5,
+                        "width": 8,
+                        "height": 50,
+                        "row": 2,
+                        "column": 1
+                    },
+                    "type": "CHART"
+                },
+                "CHART-6": {
+                    "children": [],
+                    "id": "CHART-6",
+                    "meta": {
+                        "chartId": 6,
+                        "width": 12,
+                        "height": 50,
+                        "row": 3,
+                        "column": 0
+                    },
+                    "type": "CHART"
+                },
+                "CHART-7": {
+                    "children": [],
+                    "id": "CHART-7",
+                    "meta": {
+                        "chartId": 7,
+                        "width": 12,
+                        "height": 50,
+                        "row": 4,
+                        "column": 0
+                    },
+                    "type": "CHART"
+                },
+                "GRID": {
+                    "children": ["CHART-1", "CHART-2", "CHART-3", "CHART-4", "CHART-5", "CHART-6", "CHART-7"],
+                    "id": "GRID",
+                    "meta": {
+                        "width": 12,
+                        "height": 250
+                    },
+                    "type": "GRID"
+                }
+            },
+            "metadata": {
+                "timed_refresh_immune_slices": [],
+                "expanded_slices": {},
+                "refresh_frequency": 30,
+                "default_filters": {}
+            },
+            "charts": {
+                "CHART-1": {
+                    "form_data": {
+                        "datasource": "1__table",
+                        "viz_type": "line",
+                        "slice_id": 1,
+                        "metric": {
+                            "expressionType": "SIMPLE",
+                            "column": {
+                                "column_name": "id",
+                                "type": "BIGINT"
+                            },
+                            "aggregate": "COUNT"
+                        },
+                        "groupby": ["hour_bucket"],
+                        "time_range": "Last 24 hours",
+                        "row_limit": 1000
+                    }
+                },
+                "CHART-2": {
+                    "form_data": {
+                        "datasource": "1__table",
+                        "viz_type": "pie",
+                        "slice_id": 2,
+                        "metric": {
+                            "expressionType": "SIMPLE",
+                            "column": {
+                                "column_name": "id",
+                                "type": "BIGINT"
+                            },
+                            "aggregate": "COUNT"
+                        },
+                        "groupby": ["level"],
+                        "row_limit": 10
+                    }
+                },
+                "CHART-3": {
+                    "form_data": {
+                        "datasource": "1__table",
+                        "viz_type": "bar",
+                        "slice_id": 3,
+                        "metric": {
+                            "expressionType": "SIMPLE",
+                            "column": {
+                                "column_name": "id",
+                                "type": "BIGINT"
+                            },
+                            "aggregate": "COUNT"
+                        },
+                        "groupby": ["source"],
+                        "row_limit": 10,
+                        "order_desc": true
+                    }
+                },
+                "CHART-4": {
+                    "form_data": {
+                        "datasource": "1__table",
+                        "viz_type": "bar",
+                        "slice_id": 4,
+                        "metric": {
+                            "expressionType": "SIMPLE",
+                            "column": {
+                                "column_name": "id",
+                                "type": "BIGINT"
+                            },
+                            "aggregate": "COUNT"
+                        },
+                        "groupby": ["error_type"],
+                        "row_limit": 3,
+                        "order_desc": true,
+                        "adhoc_filters": [
+                            {
+                                "clause": "WHERE",
+                                "comparator": "ERROR",
+                                "expressionType": "SIMPLE",
+                                "operator": "IN",
+                                "subject": "level"
+                            }
+                        ]
+                    }
+                },
+                "CHART-5": {
+                    "form_data": {
+                        "datasource": "1__table",
+                        "viz_type": "pivot_table",
+                        "slice_id": 5,
+                        "metrics": [
+                            {
+                                "expressionType": "SIMPLE",
+                                "column": {
+                                    "column_name": "id",
+                                    "type": "BIGINT"
+                                },
+                                "aggregate": "COUNT"
+                            }
+                        ],
+                        "groupby": ["source", "error_type"],
+                        "row_limit": 3,
+                        "order_desc": true
+                    }
+                },
+                "CHART-6": {
+                    "form_data": {
+                        "datasource": "1__table",
+                        "viz_type": "line",
+                        "slice_id": 6,
+                        "metric": {
+                            "expressionType": "SQL",
+                            "sqlExpression": "COUNT(*) FILTER (WHERE level IN ('ERROR', 'CRITICAL')) * 100.0 / NULLIF(COUNT(*), 0)"
+                        },
+                        "groupby": ["hour_bucket", "source"],
+                        "time_range": "Last 48 hours",
+                        "row_limit": 1000
+                    }
+                },
+                "CHART-7": {
+                    "form_data": {
+                        "datasource": "1__table",
+                        "viz_type": "table",
+                        "slice_id": 7,
+                        "columns": ["source", "last_log_time", "hours_since_last_log", "status"],
+                        "metrics": [],
+                        "groupby": ["source"],
+                        "row_limit": 20,
+                        "adhoc_filters": [
+                            {
+                                "clause": "HAVING",
+                                "comparator": "1",
+                                "expressionType": "SIMPLE",
+                                "operator": ">",
+                                "subject": "hours_since_last_log"
+                            }
+                        ]
+                    }
+                }
+            },
+            "uuid": "log-dashboard-001"
+        }
+    ],
+    "charts": [
+        {
+            "form_data": {
+                "datasource": "1__table",
+                "viz_type": "line",
+                "metric": {
+                    "expressionType": "SIMPLE",
+                    "column": {"column_name": "id", "type": "BIGINT"},
+                    "aggregate": "COUNT"
+                },
+                "groupby": ["hour_bucket"],
+                "time_range": "Last 24 hours",
+                "row_limit": 1000
+            },
+            "slice_name": "Logs Over Time",
+            "uuid": "chart-logs-over-time"
+        },
+        {
+            "form_data": {
+                "datasource": "1__table",
+                "viz_type": "pie",
+                "metric": {
+                    "expressionType": "SIMPLE",
+                    "column": {"column_name": "id", "type": "BIGINT"},
+                    "aggregate": "COUNT"
+                },
+                "groupby": ["level"],
+                "row_limit": 10
+            },
+            "slice_name": "Logs by Level",
+            "uuid": "chart-logs-by-level"
+        },
+        {
+            "form_data": {
+                "datasource": "1__table",
+                "viz_type": "bar",
+                "metric": {
+                    "expressionType": "SIMPLE",
+                    "column": {"column_name": "id", "type": "BIGINT"},
+                    "aggregate": "COUNT"
+                },
+                "groupby": ["source"],
+                "row_limit": 10,
+                "order_desc": true
+            },
+            "slice_name": "Top 10 Sources",
+            "uuid": "chart-top-sources"
+        },
+        {
+            "form_data": {
+                "datasource": "1__table",
+                "viz_type": "bar",
+                "metric": {
+                    "expressionType": "SIMPLE",
+                    "column": {"column_name": "id", "type": "BIGINT"},
+                    "aggregate": "COUNT"
+                },
+                "groupby": ["error_type"],
+                "row_limit": 3,
+                "order_desc": true
+            },
+            "slice_name": "Top 3 Error Types",
+            "uuid": "chart-error-types"
+        },
+        {
+            "form_data": {
+                "datasource": "1__table",
+                "viz_type": "pivot_table",
+                "metrics": [
+                    {
+                        "expressionType": "SIMPLE",
+                        "column": {"column_name": "id", "type": "BIGINT"},
+                        "aggregate": "COUNT"
+                    }
+                ],
+                "groupby": ["source", "error_type"],
+                "row_limit": 3
+            },
+            "slice_name": "Errors by Source",
+            "uuid": "chart-errors-by-source"
+        },
+        {
+            "form_data": {
+                "datasource": "1__table",
+                "viz_type": "line",
+                "metric": {
+                    "expressionType": "SQL",
+                    "sqlExpression": "COUNT(*) FILTER (WHERE level IN ('ERROR', 'CRITICAL')) * 100.0 / NULLIF(COUNT(*), 0)"
+                },
+                "groupby": ["hour_bucket", "source"],
+                "time_range": "Last 48 hours"
+            },
+            "slice_name": "Error Rate Anomaly",
+            "uuid": "chart-error-rate"
+        },
+        {
+            "form_data": {
+                "datasource": "1__table",
+                "viz_type": "table",
+                "columns": ["source", "last_log_time", "hours_since_last_log", "status"],
+                "groupby": ["source"],
+                "row_limit": 20
+            },
+            "slice_name": "Dead Services",
+            "uuid": "chart-dead-services"
+        }
+    ],
+    "datasets": [
+        {
+            "table_name": "logs_view",
+            "database": "Logs DB",
+            "schema": "public",
+            "sql": "SELECT * FROM logs WHERE created_at >= NOW() - INTERVAL '30 days'",
+            "uuid": "dataset-logs-view"
+        }
+    ],
+    "databases": [
+        {
+            "database_name": "Logs DB",
+            "sqlalchemy_uri": "postgresql+psycopg2://loguser:logpass@postgres:5432/logdb",
+            "uuid": "database-logs-db"
+        }
+    ]
+}
